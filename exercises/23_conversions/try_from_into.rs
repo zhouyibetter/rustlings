@@ -28,14 +28,25 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let red = tuple.0.try_into().map_err(|_| IntoColorError::IntConversion)?;
+        let green = tuple.1.try_into().map_err(|_| IntoColorError::IntConversion)?;
+        let blue = tuple.2.try_into().map_err(|_| IntoColorError::IntConversion)?;
+        Ok(Color { red, green, blue })
+    }
 }
 
 // TODO: Array implementation.
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        if arr.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+
+        Color::try_from((arr[0], arr[1], arr[2]))
+    }
 }
 
 // TODO: Slice implementation.
@@ -43,7 +54,11 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        let array: [i16; 3] = slice.try_into().map_err(|_| IntoColorError::BadLen)?;
+
+        Color::try_from(array)
+    }
 }
 
 fn main() {
